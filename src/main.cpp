@@ -1,3 +1,4 @@
+#include "logger/logger.h"
 #include "motor-simulator/motorSimulator.h"
 #include <algorithm>
 #include <iostream>
@@ -26,6 +27,7 @@ int main(int argc, char *argv[]) {
               << "PWM = " << static_cast<int>(pwm * 100) << "%, "
               << "ADC = " << adc << ", "
               << "Error = " << (error > 0 ? "+" : "") << error << "\n";
+    Logger::instance().log("time", static_cast<int>(pwm * 100), adc, error);
 
     if (std::abs(error) <= tolerance) {
       std::cout << "\nTarget reached! Final PWM = "
@@ -40,6 +42,8 @@ int main(int argc, char *argv[]) {
     motor.setPWM(pwm);
     loop++;
   }
+
+  std::cout << "Log saved to " << Logger::instance().getFilePath() << std::endl;
 
   return 0;
 }
