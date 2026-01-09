@@ -5,7 +5,7 @@ MotorSimulator::MotorSimulator() {}
 MotorSimulator::~MotorSimulator() {}
 
 // PWN
-float MotorSimulator::getPWM() { return this->PWM; }
+float MotorSimulator::getPWM() { return PWM; }
 void MotorSimulator::setPWM(float dutyCycle) {
   PWM = std::clamp(dutyCycle, 0.0f, 1.0f);
 
@@ -14,4 +14,4 @@ void MotorSimulator::setPWM(float dutyCycle) {
 }
 
 // ADC
-int MotorSimulator::getADC() { return this->ADC; }
+int MotorSimulator::getADC() { return ADC; }
