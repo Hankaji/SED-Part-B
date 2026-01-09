@@ -5,10 +5,21 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
+  if (argc != 3 || std::string(argv[1]) != "--targetADC") {
+    std::cerr << "Usage: " << argv[0] << " --targetADC <value>\n";
+    return 1;
+  }
 
   MotorSimulator motor;
 
-  const int targetADC = 700;
+  int targetADC = 700;
+  try {
+    targetADC = std::stoi(argv[2]);
+  } catch (...) {
+    std::cerr << "Error: targetADC must be an integer\n";
+    return 1;
+  }
+
   const int tolerance = 3;
   const float step = 0.0008f;
 
@@ -40,8 +51,9 @@ int main(int argc, char *argv[]) {
     // Change PWN proportionally to error value, but never has lower than 1%
     // gain
     float deltaPWM = std::max(step * error, 0.01f);
-    pwm += deltaPWM;
-    motor.setPWM(pwm);
+    motor.setPWM(motor.getPWM() + deltaPWM);
+    pwm = motor.getPWM();
+
     loop++;
   }
 
