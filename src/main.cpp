@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
   try {
     targetADC = std::stoi(argv[2]);
   } catch (...) {
-    std::cerr << "Error: targetADC must be an integer\n";
+    std::cerr << "[ERROR] targetADC must be an integer\n";
     return 1;
   }
 
