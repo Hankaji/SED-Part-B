@@ -4,11 +4,13 @@
 
 class MotorSimulator {
 private:
-  const int ADC_MAX = 1023;
   float PWM = 0;
   int ADC = 0;
 
 public:
+  const int ADC_MIN = 0;
+  const int ADC_MAX = 1023;
+
   MotorSimulator();
   ~MotorSimulator();
 

@@ -20,6 +20,12 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  if (targetADC < motor.ADC_MIN || targetADC > motor.ADC_MAX) {
+    std::cerr << "[ERROR] Target ADC out of range (0–1023). "
+              << "Received: " << targetADC << std::endl;
+    return 1; // safely terminate program
+  }
+
   const int tolerance = 3;
   const float step = 0.0008f;
 
@@ -30,8 +36,15 @@ int main(int argc, char *argv[]) {
   std::cout << "Starting feedback control...\n";
 
   int loop = 1;
+  const int MAX_LOOPS = 100;
 
   while (true) {
+    if (loop > MAX_LOOPS) {
+      std::cerr << "[WARNING] Control loop timeout. "
+                << "Target not reached within limit." << std::endl;
+      break;
+    }
+
     int adc = motor.getADC();
     int error = targetADC - adc;
 
@@ -48,8 +61,7 @@ int main(int argc, char *argv[]) {
       break;
     }
 
-    // Change PWN proportionally to error value, but never has lower than 1%
-    // gain
+    // Change PWN proportionally to error value, with at least 1% gain
     float deltaPWM = std::max(step * error, 0.01f);
     motor.setPWM(motor.getPWM() + deltaPWM);
     pwm = motor.getPWM();
