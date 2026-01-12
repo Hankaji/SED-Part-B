@@ -8,8 +8,8 @@ private:
   int ADC = 0;
 
 public:
-  const int ADC_MIN = 0;
-  const int ADC_MAX = 1023;
+  static const int ADC_MIN = 0;
+  static const int ADC_MAX = 1023;
 
   MotorSimulator();
   ~MotorSimulator();
