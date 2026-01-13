@@ -9,7 +9,7 @@ It simulates electric motor control logic and related components.
 ## Requirements
 
 ### General
-- **CMake ≥ 3.20** (or newer)
+- **CMake ≥ 4.2.0** (or newer)
 - **C++ compiler with C++17 support**
 
 ### Platform-specific

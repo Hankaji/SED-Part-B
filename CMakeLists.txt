@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 4.2.0)
+set(CMAKE_CXX_STANDARD 17)
 project(ElectricMotorControlAndSimulation)
 
 add_executable(EMCS src/main.cpp)

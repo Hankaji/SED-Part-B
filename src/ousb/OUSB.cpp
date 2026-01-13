@@ -25,8 +25,6 @@ float OUSB::readPWM(int channel) {
     return -1.0f; // indicate failure
   }
 
-  std::cout << "TEST " << dutyPercent << std::endl;
-
   return dutyPercent;
 }
 

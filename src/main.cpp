@@ -76,6 +76,9 @@ void runClosedLoop(OUSB ousb, int targetADC) {
     std::cerr
         << "[ERROR] Control loop terminated, max iterations loop reached\n";
   }
+
+  std::cout << "\nLog saved to " << Logger::instance().getFilePath()
+            << std::endl;
 }
 
 int main(int argc, char *argv[]) {
