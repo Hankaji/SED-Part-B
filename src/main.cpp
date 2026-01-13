@@ -6,8 +6,9 @@
 int main(int argc, char *argv[]) {
 
   OUSB ousb;
+  ousb.setup();
 
-  int targetADC = 500;
+  int targetADC = 200;
   int pwm = 40;
 
   const float Kp = 0.05f;  // Percentile to increase PWN, depends on error rate
@@ -32,7 +33,7 @@ int main(int argc, char *argv[]) {
 
     // Check if targetADC is within tolerance rate
     if (std::abs(error) <= tolerance) {
-      std::cout << "Target reached.\n";
+      std::cout << "Target reached! Final PWM = " << pwm << "%" << std::endl;
       break;
     }
 

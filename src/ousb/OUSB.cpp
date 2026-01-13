@@ -3,6 +3,14 @@
 #include <sstream>
 #include <string>
 
+void OUSB::setup() {
+#ifdef _WIN32
+  Pipe::run("ousbMotorSim.exe -r pwm-freq 1 46");
+#else
+  Pipe::run("WINEDEBUG=-all  wine ousbMotorSim.exe -r pwm-freq 1 46");
+#endif
+}
+
 bool OUSB::setPWMDuty(int channel, int duty) {
   if (duty < 0 || duty > 100)
     return false;
