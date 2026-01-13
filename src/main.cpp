@@ -1,6 +1,7 @@
 #include "ousb/OUSB.h"
 #include "utils/time.h"
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 
 int main(int argc, char *argv[]) {
@@ -8,7 +9,7 @@ int main(int argc, char *argv[]) {
   OUSB ousb;
   ousb.setup();
 
-  int targetADC = 200;
+  int targetADC = 400;
   int pwm = 40;
 
   const float Kp = 0.05f;  // Percentile to increase PWN, depends on error rate
@@ -16,16 +17,21 @@ int main(int argc, char *argv[]) {
   const int tolerance = 5; // Acceptable error range
   const int MAX_LOOPS = 100;
 
+  const int SATURATION_LIMIT = 5;
+  int saturationCount = 0;
+
+  bool reached = false;
+
   for (int i = 0; i < MAX_LOOPS; ++i) {
+    ousb.setPWMDuty(1, pwm);
+
     int adc = ousb.readADC(0);
     if (adc < 0) {
-      std::cerr << "[WARNING] Simulator disconnected\n";
+      std::cerr << "[ERROR] Simulator disconnected\n";
       break;
     }
 
     int error = targetADC - adc;
-
-    ousb.setPWMDuty(1, pwm);
 
     // Log to console
     std::cout << "[Loop " << i + 1 << "] PWM=" << pwm << "% ADC=" << adc
@@ -34,12 +40,29 @@ int main(int argc, char *argv[]) {
     // Check if targetADC is within tolerance rate
     if (std::abs(error) <= tolerance) {
       std::cout << "Target reached! Final PWM = " << pwm << "%" << std::endl;
+      reached = true;
       break;
+    }
+
+    // Saturation detection
+    if (pwm == 0 || pwm == 100) {
+      saturationCount++;
+      if (saturationCount >= SATURATION_LIMIT) {
+        std::cerr << "[ERROR] PWM saturated at " << pwm << "% for "
+                  << SATURATION_LIMIT << " consecutive cycles. "
+                  << "Target ADC unreachable.\n";
+        break;
+      }
+    } else {
+      saturationCount = 0; // reset if PWM moves
     }
 
     // Calculate rate of change and clamp it to a minimum of 1% change
     int delta = static_cast<int>(Kp * error);
-    delta = std::min(delta, 1);
+    delta = std::max(std::abs(delta), 1);
+    // Copy sign (negative or positive) of error
+    // Revert it because higher pwm = lower adc
+    delta = -std::copysign(delta, error);
 
     pwm += delta;
     if (pwm < 0)
@@ -47,5 +70,10 @@ int main(int argc, char *argv[]) {
     if (pwm > 100)
       pwm = 100;
   }
+
+  if (!reached) {
+    std::cerr << "[ERROR] Control loop terminated (max iterations reached).\n";
+  }
+
   return 0;
 }
