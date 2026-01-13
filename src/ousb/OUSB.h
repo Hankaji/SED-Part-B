@@ -2,7 +2,7 @@
 
 class OUSB {
 public:
-  void setup();
+  float readPWM(int channel);
   bool setPWMDuty(int channel, int duty);
   int readADC(int channel);
   void disconnect();

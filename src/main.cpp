@@ -9,7 +9,7 @@
 void runClosedLoop(OUSB ousb, int targetADC) {
   Logger &logger = Logger::instance();
 
-  int pwm = 40;
+  int pwm = ousb.readPWM(1) * 100; // Map to 0-100 percent range
 
   const float Kp = 0.05f;  // Percentile to increase PWN, depends on error rate
                            // (Larger = more changes)
@@ -21,7 +21,8 @@ void runClosedLoop(OUSB ousb, int targetADC) {
 
   bool reached = false;
 
-  for (int i = 0; i < MAX_LOOPS; ++i) {
+  int i = 0;
+  for (; i < MAX_LOOPS; ++i) {
     ousb.setPWMDuty(1, pwm);
 
     int adc = ousb.readADC(0);
@@ -71,8 +72,9 @@ void runClosedLoop(OUSB ousb, int targetADC) {
       pwm = 100;
   }
 
-  if (!reached) {
-    std::cerr << "[ERROR] Control loop terminated (max iterations reached).\n";
+  if (!reached && i == MAX_LOOPS) {
+    std::cerr
+        << "[ERROR] Control loop terminated, max iterations loop reached\n";
   }
 }
 
@@ -81,7 +83,6 @@ int main(int argc, char *argv[]) {
   CLIResult cmd = CLI::parse(argc, argv);
 
   OUSB ousb;
-  ousb.setup();
 
   switch (cmd.mode) {
   case CLIMode::PWM:
