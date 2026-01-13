@@ -1,15 +1,14 @@
+#include "CLI.h"
+#include "logger/logger.h"
 #include "ousb/OUSB.h"
 #include "utils/time.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 
-int main(int argc, char *argv[]) {
+void runClosedLoop(OUSB ousb, int targetADC) {
+  Logger &logger = Logger::instance();
 
-  OUSB ousb;
-  ousb.setup();
-
-  int targetADC = 400;
   int pwm = 40;
 
   const float Kp = 0.05f;  // Percentile to increase PWN, depends on error rate
@@ -34,6 +33,7 @@ int main(int argc, char *argv[]) {
     int error = targetADC - adc;
 
     // Log to console
+    logger.log(getCurrentTime(), static_cast<int>(pwm * 100), adc, error);
     std::cout << "[Loop " << i + 1 << "] PWM=" << pwm << "% ADC=" << adc
               << " Error=" << error << "\n";
 
@@ -73,6 +73,31 @@ int main(int argc, char *argv[]) {
 
   if (!reached) {
     std::cerr << "[ERROR] Control loop terminated (max iterations reached).\n";
+  }
+}
+
+int main(int argc, char *argv[]) {
+
+  CLIResult cmd = CLI::parse(argc, argv);
+
+  OUSB ousb;
+  ousb.setup();
+
+  switch (cmd.mode) {
+  case CLIMode::PWM:
+    ousb.setPWMDuty(1, cmd.value);
+    std::cout << "PWM set to " << cmd.value << "%\n";
+    break;
+
+  case CLIMode::ADC: {
+    int adc = ousb.readADC(cmd.value);
+    std::cout << "ADC" << cmd.value << " = " << adc << "\n";
+    break;
+  }
+
+  case CLIMode::LOOP:
+    runClosedLoop(ousb, cmd.value); // your existing loop
+    break;
   }
 
   return 0;

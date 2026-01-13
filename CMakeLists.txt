@@ -4,6 +4,7 @@ project(ElectricMotorControlAndSimulation)
 add_executable(EMCS src/main.cpp)
 
 target_sources(EMCS PRIVATE
+  src/CLI.cpp
   src/motor-simulator/motorSimulator.cpp
   src/logger/logger.cpp
   src/utils/time.cpp
