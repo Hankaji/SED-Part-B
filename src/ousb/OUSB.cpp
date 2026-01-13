@@ -1,5 +1,5 @@
-#include "../pipe/Pipe.h"
 #include "OUSB.h"
+#include "../pipe/Pipe.h"
 #include <sstream>
 #include <string>
 
@@ -7,15 +7,27 @@ bool OUSB::setPWMDuty(int channel, int duty) {
   if (duty < 0 || duty > 100)
     return false;
 
-  std::string cmd = "ousbMotorSim.exe -r pwm " + std::to_string(channel) + " " +
-                    std::to_string(duty);
+#ifdef _WIN32
+  std::string preCmd = "ousbMotorSim.exe -r pwm ";
+#else
+  std::string preCmd = "WINEDEBUG=-all  wine ousbMotorSim.exe -r pwm ";
+#endif
+
+  std::string cmd =
+      preCmd + std::to_string(channel) + " " + std::to_string(duty);
 
   Pipe::run(cmd);
   return true;
 }
 
 int OUSB::readADC(int channel) {
-  std::string cmd = "ousbMotorSim.exe -r adc " + std::to_string(channel);
+#ifdef _WIN32
+  std::string preCmd = "ousbMotorSim.exe -r adc ";
+#else
+  std::string preCmd = "WINEDEBUG=-all  wine ousbMotorSim.exe -r adc ";
+#endif
+
+  std::string cmd = preCmd + std::to_string(channel);
 
   std::string output = Pipe::run(cmd);
 

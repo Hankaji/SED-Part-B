@@ -5,6 +5,7 @@
 
 #include "logger/logger.h"
 #include "motor-simulator/motorSimulator.h"
+#include "ousb/OUSB.h"
 #include "utils/time.h"
 
 // Draw ASCII banner
@@ -34,52 +35,44 @@ static int askTargetADC() {
 
 // Closed-loop execution
 static void runControlLoop(int targetADC) {
-  MotorSimulator motor;
-  Logger &logger = Logger::instance();
 
-  float pwm = 0.45f;
-  const float Kp = 0.0008f;
-  const float minStep = 0.01f;
+  OUSB ousb;
+
+  int pwm = 40;
+
+  const float Kp = 0.05f;
   const int tolerance = 5;
   const int MAX_LOOPS = 100;
 
-  motor.setPWM(pwm);
-
-  std::cout << "\nStarting feedback control...\n\n";
-
-  for (int loop = 1; loop <= MAX_LOOPS; ++loop) {
-    int adc = motor.getADC();
+  for (int i = 0; i < MAX_LOOPS; ++i) {
+    int adc = ousb.readADC(0);
     if (adc < 0) {
-      std::cerr << "[WARNING] Simulator communication failed.\n";
+      std::cerr << "[WARNING] Simulator disconnected\n";
       break;
     }
 
     int error = targetADC - adc;
 
-    motor.setPWM(pwm);
+    int delta = static_cast<int>(Kp * error);
+    if (delta == 0 && error != 0)
+      delta = (error > 0) ? 1 : -1;
 
-    std::string time = getCurrentTime();
+    pwm += delta;
+    if (pwm < 0)
+      pwm = 0;
+    if (pwm > 100)
+      pwm = 100;
 
-    logger.log(time, static_cast<int>(pwm * 100), adc, error);
+    ousb.setPWMDuty(1, pwm);
 
-    std::cout << "[Loop " << loop << "] "
-              << "PWM = " << static_cast<int>(pwm * 100) << "%, "
-              << "ADC = " << adc << ", "
-              << "Error = " << (error > 0 ? "+" : "") << error << "\n";
+    std::cout << "[Loop " << i + 1 << "] PWM=" << pwm << "% ADC=" << adc
+              << " Error=" << error << "\n";
 
     if (std::abs(error) <= tolerance) {
-      std::cout << "\nTarget reached! Final PWM = "
-                << static_cast<int>(pwm * 100) << "%\n";
-      return;
+      std::cout << "Target reached.\n";
+      break;
     }
-
-    // Change PWN proportionally to error value, with at least 1% gain
-    float deltaPWM = std::max(Kp * error, 0.01f);
-    motor.setPWM(motor.getPWM() + deltaPWM);
-    pwm = motor.getPWM();
   }
-
-  std::cout << "\n[WARNING] Control loop terminated without convergence.\n";
 }
 
 void TUI::run() {
