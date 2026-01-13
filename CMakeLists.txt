@@ -8,6 +8,8 @@ target_sources(EMCS PRIVATE
   src/logger/logger.cpp
   src/utils/time.cpp
   src/TUI.cpp
+  src/ousb/OUSB.cpp
+  src/pipe/Pipe.cpp
 )
 
 target_include_directories(EMCS PRIVATE src)
