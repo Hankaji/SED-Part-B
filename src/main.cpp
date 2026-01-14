@@ -1,7 +1,7 @@
 #include "CLI.h"
-#include "logger/logger.h"
+#include "logger/Logger.h"
 #include "ousb/OUSB.h"
-#include "utils/time.h"
+#include "utils/Time.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
