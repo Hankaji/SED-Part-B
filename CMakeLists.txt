@@ -6,7 +6,7 @@ add_executable(EMCS src/main.cpp)
 
 target_sources(EMCS PRIVATE
   src/CLI.cpp
-  src/logger/logger.cpp
+  src/logger/Logger.cpp
   src/utils/Time.cpp
   src/ousb/OUSB.cpp
   src/pipe/Pipe.cpp
